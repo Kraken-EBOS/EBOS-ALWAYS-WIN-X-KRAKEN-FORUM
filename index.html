@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💀 EBOS ALWAYS WIN X KRAKEN</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐙</text></svg>">
+
+<!-- Firebase (compat SDK — работает без сборщиков, прямо в браузере) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    min-height: 100vh; overflow-x: hidden;
+    background: radial-gradient(circle at 20% 20%, #0f2027, #203a43, #2c5364);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+  }
+  body.no-touch { cursor: none; }
+
+  #wallpaperLayer {
+    position: fixed; inset: 0; z-index: 0;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+    transition: opacity 0.5s ease; opacity: 0;
+  }
+  #wallpaperLayer.active { opacity: 1; }
+  #wallpaperLayer::after { content: ''; position: absolute; inset: 0; background: rgba(10, 15, 15, 0.6); }
+
+  canvas#smoke { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 10; }
+  canvas#matrixCanvas { position: fixed; top: 0; left: 0; z-index: 0; opacity: 0.12; pointer-events: none; }
+
+  .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.3; animation: float 12s infinite ease-in-out; z-index: 1; }
+  .blob1 { width: 400px; height: 400px; background: #00ff87; top: -100px; left: -100px; }
+  .blob2 { width: 350px; height: 350px; background: #00c6ff; bottom: -100px; right: -100px; animation-delay: 4s; }
+  .blob3 { width: 250px; height: 250px; background: #7cff6b; top: 50%; left: 50%; animation-delay: 8s; }
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -60px) scale(1.1); }
+    66% { transform: translate(-30px, 40px) scale(0.95); }
+  }
+
+  #splash {
+    position: fixed; inset: 0; z-index: 999; background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease; font-family: 'Consolas', monospace;
+  }
+  #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  #splashText { color: #00ff87; font-size: 1.05rem; text-align: left; white-space: pre; text-shadow: 0 0 10px rgba(0,255,135,0.6); }
+
+  .navbar {
+    position: fixed; top: 0; left: 0; width: 100%; display: flex; justify-content: center;
+    gap: 8px; padding: 14px; z-index: 50; background: rgba(5, 10, 12, 0.7);
+    backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,255,135,0.25); flex-wrap: wrap;
+  }
+  .nav-btn {
+    padding: 9px 18px; border-radius: 6px; border: 1px solid rgba(0,255,135,0.3);
+    background: rgba(255,255,255,0.03); color: #b8ffe0; font-size: 0.85rem; cursor: pointer;
+    transition: all 0.3s; font-family: 'Consolas', monospace;
+  }
+  .nav-btn:hover { background: rgba(0,255,135,0.15); box-shadow: 0 0 15px rgba(0,255,135,0.3); }
+  .nav-btn.active { background: linear-gradient(135deg, #00ff87, #00c6ff); color: #000; font-weight: bold; border-color: transparent; }
+
+  .page { display: none; min-height: 100vh; position: relative; z-index: 5; padding-top: 95px; animation: pageIn 0.5s ease; }
+  .page.active { display: block; }
+  @keyframes pageIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+  .container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; padding-bottom: 60px; }
+
+  h1.glitch {
+    font-size: 2.6rem; color: #00ff87; font-family: 'Consolas', monospace;
+    text-shadow: 0 0 20px rgba(0,255,135,0.6); margin-bottom: 15px; padding: 0 20px; position: relative; letter-spacing: 1px;
+  }
+  h1.glitch::before, h1.glitch::after { content: attr(data-text); position: absolute; left: 0; top: 0; width: 100%; padding: 0 20px; }
+  h1.glitch::before { color: #00c6ff; animation: glitchTop 3s infinite linear alternate-reverse; clip-path: inset(0 0 60% 0); }
+  h1.glitch::after { color: #ff4d6d; animation: glitchBottom 2.5s infinite linear alternate-reverse; clip-path: inset(60% 0 0 0); }
+  @keyframes glitchTop { 0% { transform: translate(0,0); } 20% { transform: translate(-3px,-2px); } 40% { transform: translate(3px,2px); } 60% { transform: translate(-2px,1px); } 80% { transform: translate(2px,-1px); } 100% { transform: translate(0,0); } }
+  @keyframes glitchBottom { 0% { transform: translate(0,0); } 25% { transform: translate(2px,2px); } 50% { transform: translate(-3px,-1px); } 75% { transform: translate(3px,-2px); } 100% { transform: translate(0,0); } }
+
+  p.subtitle { font-size: 1.05rem; color: rgba(255,255,255,0.65); margin-bottom: 40px; letter-spacing: 1px; padding: 0 20px; font-family: 'Consolas', monospace; }
+  .typing-cursor { display: inline-block; width: 10px; background: #00ff87; margin-left: 3px; animation: blink 0.8s infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .btn {
+    padding: 15px 36px; font-size: 1rem; border: none; border-radius: 6px;
+    background: linear-gradient(135deg, #00ff87, #00c6ff); color: #000; font-weight: bold; cursor: pointer;
+    box-shadow: 0 0 30px rgba(0,255,135,0.5); transition: all 0.3s ease; position: relative; overflow: hidden;
+    font-family: 'Consolas', monospace;
+  }
+  .btn:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 10px 40px rgba(0,255,135,0.7); }
+  .btn:active { transform: translateY(-1px) scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.5); transform: scale(0); animation: rippleAnim 0.6s ease-out; pointer-events: none; }
+  @keyframes rippleAnim { to { transform: scale(3); opacity: 0; } }
+
+  .cards { display: flex; gap: 26px; margin-top: 55px; flex-wrap: wrap; justify-content: center; max-width: 1000px; padding: 0 20px; }
+  .card {
+    width: 200px; padding: 26px 16px; background: rgba(0,20,15,0.4);
+    border: 1px solid rgba(0,255,135,0.25); border-radius: 10px; backdrop-filter: blur(10px); transition: all 0.4s ease;
+  }
+  .card:hover { transform: translateY(-10px); background: rgba(0,255,135,0.08); border-color: rgba(0,255,135,0.7); box-shadow: 0 15px 40px rgba(0,255,135,0.3); }
+  .card .icon { font-size: 2.2rem; margin-bottom: 10px; }
+  .card h3 { color: #00ff87; margin-bottom: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; }
+  .card p { font-size: 0.8rem; color: rgba(255,255,255,0.55); line-height: 1.5; }
+
+  .stats-bar { display: flex; gap: 40px; margin-top: 50px; flex-wrap: wrap; justify-content: center; }
+  .stat-item { text-align: center; }
+  .stat-item .num { font-size: 2rem; font-weight: bold; color: #00ff87; font-family: 'Consolas', monospace; text-shadow: 0 0 15px rgba(0,255,135,0.5); }
+  .stat-item .lbl { font-size: 0.78rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* === СЛОВАРЬ === */
+  .dict-page { display: flex; justify-content: center; padding: 0 20px 60px; }
+  .dict-box {
+    width: 100%; max-width: 900px; background: rgba(0,15,12,0.45);
+    border: 1px solid rgba(0,255,135,0.25); border-radius: 14px;
+    backdrop-filter: blur(15px); box-shadow: 0 0 40px rgba(0,255,135,0.15); padding: 28px; color: white;
+  }
+  .dict-box h2 { color: #00ff87; text-align: center; margin-bottom: 5px; font-family: 'Consolas', monospace; font-size: 1.4rem; }
+  .dict-box > p.dict-sub { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.88rem; margin-bottom: 22px; }
+
+  .search-wrap { position: relative; margin-bottom: 18px; }
+  .search-wrap input {
+    width: 100%; padding: 13px 45px 13px 16px; border-radius: 8px;
+    border: 1px solid rgba(0,255,135,0.35); background: rgba(0,0,0,0.35);
+    color: #b8ffe0; font-size: 0.95rem; outline: none; font-family: 'Consolas', monospace;
+  }
+  .search-wrap input::placeholder { color: rgba(184,255,224,0.35); }
+  .search-wrap .search-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: #00ff87; }
+
+  .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-tab {
+    padding: 7px 14px; border-radius: 20px; border: 1px solid rgba(0,255,135,0.3);
+    background: rgba(255,255,255,0.03); color: #b8ffe0; cursor: pointer; font-size: 0.78rem;
+    transition: all 0.25s; font-family: 'Consolas', monospace;
+  }
+  .filter-tab:hover { background: rgba(0,255,135,0.1); }
+  .filter-tab.active { background: linear-gradient(135deg, #00ff87, #00c6ff); color: #000; font-weight: bold; border-color: transparent; }
+
+  .term-count { color: rgba(255,255,255,0.4); font-size: 0.78rem; margin-bottom: 14px; text-align: right; }
+  .term-list { display: flex; flex-direction: column; gap: 10px; max-height: 62vh; overflow-y: auto; padding-right: 6px; }
+  .term-list::-webkit-scrollbar { width: 6px; }
+  .term-list::-webkit-scrollbar-thumb { background: rgba(0,255,135,0.4); border-radius: 10px; }
+
+  .term-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(0,255,135,0.15); border-radius: 10px; overflow: hidden; transition: all 0.3s; }
+  .term-card:hover { border-color: rgba(0,255,135,0.5); }
+  .term-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; gap: 12px; }
+  .term-title-wrap { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .term-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .term-name { font-family: 'Consolas', monospace; font-weight: bold; color: #00ff87; font-size: 0.98rem; }
+  .term-tag { font-size: 0.66rem; padding: 3px 9px; border-radius: 12px; background: rgba(0,255,135,0.12); color: #7cffb2; border: 1px solid rgba(0,255,135,0.25); white-space: nowrap; }
+  .term-arrow { color: #00ff87; transition: transform 0.3s; flex-shrink: 0; }
+  .term-card.open .term-arrow { transform: rotate(180deg); }
+  .term-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; padding: 0 18px; }
+  .term-card.open .term-body { max-height: 600px; padding: 0 18px 18px; }
+  .term-body-inner { border-top: 1px solid rgba(0,255,135,0.15); padding-top: 12px; }
+  .term-label { color: #00c6ff; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; margin-top: 10px; font-weight: bold; }
+  .term-label:first-child { margin-top: 0; }
+  .term-text { color: rgba(255,255,255,0.8); font-size: 0.88rem; line-height: 1.6; }
+  .no-results { text-align: center; padding: 40px; color: rgba(255,255,255,0.4); font-family: 'Consolas', monospace; }
+
+  /* === ЧАТ (общий) === */
+  .chat-page { display: flex; justify-content: center; padding: 0 20px 60px; }
+  .chat-box {
+    width: 100%; max-width: 720px; background: rgba(0,15,12,0.45);
+    border: 1px solid rgba(0,255,135,0.25); border-radius: 14px;
+    backdrop-filter: blur(15px); box-shadow: 0 0 40px rgba(0,255,135,0.15);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .chat-header { padding: 18px; text-align: center; background: rgba(0,255,135,0.08); border-bottom: 1px solid rgba(0,255,135,0.2); display:flex; align-items:center; justify-content:center; gap:10px; position:relative; }
+  .chat-header h2 { color: #00ff87; font-size: 1.2rem; font-family: 'Consolas', monospace; }
+  .chat-header p { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 4px; }
+  .chat-back-btn {
+    position:absolute; left:18px; top:50%; transform:translateY(-50%);
+    background: rgba(255,255,255,0.08); border:1px solid rgba(0,255,135,0.3); color:#00ff87;
+    border-radius:6px; padding:6px 12px; cursor:pointer; font-family:'Consolas',monospace; font-size:0.8rem;
+  }
+  .chat-back-btn:hover { background: rgba(0,255,135,0.15); }
+
+  .chat-toolbar { display: flex; gap: 10px; padding: 10px 15px; background: rgba(0,0,0,0.15); border-bottom: 1px solid rgba(0,255,135,0.15); flex-wrap: wrap; align-items: center; justify-content: space-between; }
+  .online-badge { font-size: 0.78rem; color: #00ff87; font-family: 'Consolas', monospace; display: flex; align-items: center; gap: 6px; }
+  .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #00ff87; box-shadow: 0 0 8px #00ff87; animation: pulse 1.5s infinite; }
+  .toolbar-btn { padding: 7px 13px; border-radius: 20px; border: 1px solid rgba(0,255,135,0.3); background: #0d2018; color: #b8ffe0; font-size: 0.78rem; cursor: pointer; font-family: 'Consolas', monospace; }
+  .toolbar-btn:hover { background: rgba(0,255,135,0.15); }
+
+  .chat-messages { height: 400px; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .chat-messages::-webkit-scrollbar { width: 6px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: rgba(0,255,135,0.4); border-radius: 10px; }
+
+  .message { max-width: 85%; padding: 11px 16px; border-radius: 14px; line-height: 1.5; font-size: 0.9rem; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .message.mine { align-self: flex-end; background: linear-gradient(135deg, #00ff87, #00c6ff); color: #000; font-weight: 500; border-bottom-right-radius: 4px; }
+  .message.other { align-self: flex-start; background: rgba(255,255,255,0.07); color: #d8ffef; border: 1px solid rgba(0,255,135,0.2); border-bottom-left-radius: 4px; }
+  .message.system { align-self: center; background: transparent; color: rgba(255,255,255,0.4); font-size: 0.78rem; font-style: italic; padding: 4px; text-align:center; }
+  .msg-author { font-size: 0.68rem; color: #00ff87; opacity: 0.85; margin-bottom: 4px; display: block; font-weight: bold; }
+  .message.mine .msg-author { color: rgba(0,0,0,0.6); }
+  .msg-time { font-size: 0.63rem; color: rgba(255,255,255,0.35); margin-top: 5px; text-align: right; }
+  .message.mine .msg-time { color: rgba(0,0,0,0.5); }
+
+  .chat-input-area { display: flex; padding: 14px; gap: 10px; align-items: flex-end; border-top: 1px solid rgba(0,255,135,0.2); background: rgba(0,0,0,0.15); }
+  .chat-input-area textarea {
+    flex: 1; padding: 12px 16px; border-radius: 18px; resize: none;
+    border: 1px solid rgba(0,255,135,0.3); background: rgba(255,255,255,0.05);
+    color: white; font-size: 0.92rem; outline: none; font-family: inherit; max-height: 90px; line-height: 1.4;
+  }
+  .chat-input-area textarea::placeholder { color: rgba(255,255,255,0.4); }
+  .send-btn, .mic-btn { padding: 0 18px; height: 42px; border: none; border-radius: 22px; background: linear-gradient(135deg, #00ff87, #00c6ff); color: #000; font-weight: bold; cursor: pointer; flex-shrink: 0; }
+  .mic-btn { padding: 0 13px; background: rgba(255,255,255,0.08); color: #00ff87; border: 1px solid rgba(0,255,135,0.4); }
+  .mic-btn.recording { background: #ff4d4d; color: white; box-shadow: 0 0 20px rgba(255,77,77,0.7); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{ transform: scale(1); opacity: 1;} 50%{ transform: scale(1.15); opacity: 0.7; } }
+  .send-btn:hover { transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .chat-locked { padding: 55px 30px; text-align: center; color: white; }
+  .chat-locked .icon { font-size: 2.8rem; margin-bottom: 14px; }
+  .chat-locked h3 { color: #00ff87; margin-bottom: 10px; font-family: 'Consolas', monospace; }
+  .chat-locked p { color: rgba(255,255,255,0.6); margin-bottom: 22px; font-size: 0.88rem; line-height: 1.5; }
+
+  /* === ТЕМЫ === */
+  .topics-page { display: flex; justify-content: center; padding: 0 20px 60px; }
+  .topics-box {
+    width: 100%; max-width: 900px; background: rgba(0,15,12,0.45);
+    border: 1px solid rgba(0,255,135,0.25); border-radius: 14px;
+    backdrop-filter: blur(15px); box-shadow: 0 0 40px rgba(0,255,135,0.15); padding: 28px; color: white;
+  }
+  .topics-box h2 { color: #00ff87; text-align: center; margin-bottom: 5px; font-family: 'Consolas', monospace; font-size: 1.4rem; }
+  .topics-box > p { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.88rem; margin-bottom: 28px; }
+  .topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  .topic-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(0,255,135,0.2); border-radius: 12px;
+    padding: 22px; cursor: pointer; transition: all 0.3s; text-align:center;
+  }
+  .topic-card:hover { transform: translateY(-6px); border-color: rgba(0,255,135,0.6); box-shadow: 0 10px 30px rgba(0,255,135,0.25); background: rgba(0,255,135,0.06); }
+  .topic-card .topic-icon { font-size: 2.2rem; margin-bottom: 10px; }
+  .topic-card .topic-name { color: #00ff87; font-family:'Consolas',monospace; font-weight:bold; margin-bottom: 6px; }
+  .topic-card .topic-desc { color: rgba(255,255,255,0.55); font-size: 0.8rem; line-height: 1.4; }
+
+  /* === ПРАВИЛА === */
+  .rules-page { display: flex; justify-content: center; padding: 0 20px 60px; }
+  .rules-box {
+    width: 100%; max-width: 700px; background: rgba(0,15,12,0.45);
+    border: 1px solid rgba(0,255,135,0.25); border-radius: 14px;
+    backdrop-filter: blur(15px); box-shadow: 0 0 40px rgba(0,255,135,0.15); padding: 34px; color: white;
+  }
+  .rules-box h2 { color: #00ff87; text-align: center; margin-bottom: 5px; font-family: 'Consolas', monospace; font-size: 1.5rem; }
+  .rules-box > p.rules-sub { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.88rem; margin-bottom: 30px; }
+  .rule-item {
+    display: flex; gap: 18px; align-items: flex-start; padding: 20px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(0,255,135,0.15); border-radius: 12px; margin-bottom: 16px;
+    transition: all 0.3s;
+  }
+  .rule-item:hover { border-color: rgba(0,255,135,0.5); background: rgba(0,255,135,0.05); }
+  .rule-number {
+    width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #00ff87, #00c6ff);
+    color: #000; font-weight: bold; font-family:'Consolas',monospace; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 1.1rem;
+  }
+  .rule-text h3 { color: #00ff87; font-family:'Consolas',monospace; font-size: 1rem; margin-bottom: 6px; }
+  .rule-text p { color: rgba(255,255,255,0.7); font-size: 0.88rem; line-height: 1.5; }
+  .rules-footer-note {
+    margin-top: 25px; padding: 16px; text-align:center; border-radius: 10px;
+    background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.3); color: #ff9b9b; font-size: 0.85rem;
+  }
+
+  /* === ОБОИ === */
+  .wallpaper-wrapper { display: flex; justify-content: center; padding: 0 20px 60px; }
+  .wallpaper-box {
+    width: 100%; max-width: 800px; background: rgba(0,15,12,0.45);
+    border: 1px solid rgba(0,255,135,0.25); border-radius: 14px;
+    backdrop-filter: blur(15px); box-shadow: 0 0 40px rgba(0,255,135,0.15); padding: 28px; color: white;
+  }
+  .wallpaper-box h2 { color: #00ff87; text-align: center; margin-bottom: 5px; font-family: 'Consolas', monospace; }
+  .wallpaper-box > p { text-align: center; color: rgba(255,255,255,0.5); font-size: 0.88rem; margin-bottom: 28px; }
+  .wallpaper-section-title { font-size: 0.98rem; color: #00ff87; margin: 22px 0 14px; padding-left: 5px; border-left: 3px solid #00ff87; font-family: 'Consolas', monospace; }
+  .wallpaper-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 18px; }
+  .wallpaper-item {
+    position: relative; height: 130px; border-radius: 10px; overflow: hidden; cursor: pointer;
+    border: 3px solid transparent; transition: all 0.3s; background-size: cover; background-position: center;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .wallpaper-item.black-swatch { background: #000; }
+  .wallpaper-item:hover { transform: translateY(-6px); box-shadow: 0 10px 25px rgba(0,255,135,0.3); }
+  .wallpaper-item.selected { border-color: #00ff87; box-shadow: 0 0 25px rgba(0,255,135,0.5); }
+  .wallpaper-label { width: 100%; padding: 7px; text-align: center; font-size: 0.8rem; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: white; font-weight: 500; font-family: 'Consolas', monospace; }
+  .wallpaper-check { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: #00ff87; color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; opacity: 0; transform: scale(0); transition: all 0.3s; }
+  .wallpaper-item.selected .wallpaper-check { opacity: 1; transform: scale(1); }
+
+  /* === АККАУНТ === */
+  .account-wrapper { display: flex; justify-content: center; padding: 0 20px 60px; }
+  .auth-box, .profile-box {
+    width: 100%; max-width: 420px; background: rgba(0,15,12,0.45);
+    border: 1px solid rgba(0,255,135,0.25); border-radius: 14px;
+    backdrop-filter: blur(15px); box-shadow: 0 0 40px rgba(0,255,135,0.15); padding: 28px; color: white;
+  }
+  .auth-tabs { display: flex; margin-bottom: 22px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,255,135,0.3); }
+  .auth-tab { flex: 1; padding: 11px; background: transparent; border: none; color: white; cursor: pointer; font-size: 0.92rem; font-family: 'Consolas', monospace; }
+  .auth-tab.active { background: linear-gradient(135deg, #00ff87, #00c6ff); color: #000; font-weight: bold; }
+  .auth-form { display: none; flex-direction: column; gap: 13px; }
+  .auth-form.active { display: flex; }
+  .auth-form input { padding: 13px 16px; border-radius: 8px; border: 1px solid rgba(0,255,135,0.3); background: rgba(255,255,255,0.05); color: white; font-size: 0.95rem; outline: none; font-family: 'Consolas', monospace; }
+  .auth-form input::placeholder { color: rgba(255,255,255,0.4); }
+  .auth-hint { color: rgba(255,255,255,0.45); font-size: 0.78rem; text-align: center; font-style: italic; }
+  .auth-error { color: #ff6b6b; font-size: 0.82rem; text-align: center; min-height: 18px; }
+  .profile-box { text-align: center; }
+  .avatar { width: 85px; height: 85px; border-radius: 50%; margin: 0 auto 18px; background: linear-gradient(135deg, #00ff87, #00c6ff); display: flex; align-items: center; justify-content: center; font-size: 2.3rem; font-weight: bold; color: #000; box-shadow: 0 0 30px rgba(0,255,135,0.5); }
+  .profile-box h2 { color: #00ff87; margin-bottom: 5px; font-family: 'Consolas', monospace; }
+  .profile-sub { color: rgba(255,255,255,0.5); font-size: 0.82rem; margin-bottom: 22px; }
+  .profile-stats { display: flex; justify-content: center; gap: 22px; margin-bottom: 18px; flex-wrap: wrap; }
+  .stat span { display: block; font-size: 1.4rem; font-weight: bold; color: #00ff87; font-family: 'Consolas', monospace; }
+  .stat small { color: rgba(255,255,255,0.5); font-size: 0.68rem; }
+  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
+  .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.72rem; background: rgba(0,255,135,0.1); border: 1px solid rgba(0,255,135,0.3); color: #00ff87; font-family: 'Consolas', monospace; }
+  .badge.locked { opacity: 0.3; border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); }
+  .logout-btn { background: rgba(255,77,77,0.15); color: #ff6b6b; border: 1px solid rgba(255,77,77,0.4); box-shadow: none; padding: 11px 24px; font-size: 0.88rem; }
+  .logout-btn:hover { background: rgba(255,77,77,0.25); box-shadow: 0 0 20px rgba(255,77,77,0.3); }
+
+  .cursor-dot {
+    position: fixed; width: 10px; height: 10px; border-radius: 50%; background: #00ff87;
+    box-shadow: 0 0 15px 5px rgba(0,255,135,0.8); pointer-events: none; z-index: 300;
+    transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s; display: none;
+  }
+  body.no-touch .cursor-dot { display: block; }
+
+  #toastContainer { position: fixed; top: 85px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; max-width: 90vw; }
+  .toast {
+    padding: 13px 18px; border-radius: 8px; color: white; font-size: 0.86rem;
+    background: rgba(5,15,15,0.92); border: 1px solid rgba(0,255,135,0.4);
+    box-shadow: 0 5px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+    animation: toastIn 0.3s ease; max-width: 280px; font-family: 'Consolas', monospace;
+  }
+  .toast.error { border-color: rgba(255,107,107,0.5); }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  .toast.hide { animation: toastOut 0.3s ease forwards; }
+  @keyframes toastOut { to { opacity: 0; transform: translateX(40px); } }
+
+  footer { position: relative; padding: 20px; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 0.78rem; z-index: 5; font-family: 'Consolas', monospace; }
+
+  @media (max-width: 600px) {
+    h1.glitch { font-size: 1.7rem; }
+    p.subtitle { font-size: 0.9rem; }
+    .nav-btn { padding: 7px 11px; font-size: 0.72rem; }
+    .card { width: 100%; max-width: 300px; }
+    .term-header { padding: 12px; }
+    .chat-messages { height: 50vh; }
+  }
+</style>
+</head>
+<body>
+
+<div id="splash"><div id="splashText"></div></div>
+
+<canvas id="matrixCanvas"></canvas>
+<div id="wallpaperLayer"></div>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<canvas id="smoke"></canvas>
+<div class="cursor-dot" id="cursorDot"></div>
+<div id="toastContainer"></div>
+
+<div class="navbar">
+  <button class="nav-btn active" data-page="home" onclick="showPage('home', this)">🏠 Главная</button>
+  <button class="nav-btn" data-page="dict" onclick="showPage('dict', this)">📖 Словарь</button>
+  <button class="nav-btn" data-page="chat" onclick="showPage('chat', this)">💬 Чат</button>
+  <button class="nav-btn" data-page="topics" onclick="showPage('topics', this)">🗂 Темы</button>
+  <button class="nav-btn" data-page="rules" onclick="showPage('rules', this)">📜 Правила</button>
+  <button class="nav-btn" data-page="wallpaper" onclick="showPage('wallpaper', this)">🖼 Обои</button>
+  <button class="nav-btn" data-page="account" id="navAccountBtn" onclick="showPage('account', this)">🔐 Аккаунт</button>
+</div>
+
+<!-- ГЛАВНАЯ -->
+<div class="page active" id="page-home">
+  <div class="container">
+    <h1 class="glitch" data-text="EBOS ALWAYS WIN X KRAKEN">EBOS ALWAYS WIN X KRAKEN</h1>
+    <p class="subtitle"><span id="typedSubtitle"></span><span class="typing-cursor">&nbsp;</span></p>
+    <button class="btn" onclick="showPage('chat')">&gt; Открыть чат_</button>
+
+    <div class="cards">
+      <div class="card"><div class="icon">📖</div><h3>Словарь</h3><p>DoS, DDoS, фишинг и десятки терминов простым языком</p></div>
+      <div class="card"><div class="icon">💬</div><h3>Живой чат</h3><p>Настоящее общение через интернет с любыми зарегистрированными хакерами</p></div>
+      <div class="card"><div class="icon">🗂</div><h3>Темы</h3><p>Отдельные комнаты для разных тем обсуждений</p></div>
+      <div class="card"><div class="icon">📜</div><h3>Правила</h3><p>Ознакомься перед тем, как начать общение</p></div>
+      <div class="card"><div class="icon">🖼</div><h3>Обои</h3><p>Выбери стиль — от чёрного минимализма до хакерской эстетики</p></div>
+      <div class="card"><div class="icon">🔐</div><h3>Аккаунт</h3><p>Регистрируйся сам и получай ачивки за прогресс</p></div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item"><div class="num" id="termCountStat">0</div><div class="lbl">терминов</div></div>
+      <div class="stat-item"><div class="num">5</div><div class="lbl">тем чата</div></div>
+      <div class="stat-item"><div class="num">🌐</div><div class="lbl">онлайн</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- СЛОВАРЬ -->
+<div class="page" id="page-dict">
+  <div class="dict-page">
+    <div class="dict-box">
+      <h2>📖 Хакерский словарь</h2>
+      <p class="dict-sub">Термины из мира кибербезопасности простым языком</p>
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="Поиск термина... (например: DDoS)">
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="filter-tabs" id="filterTabs"></div>
+      <div class="term-count" id="termCount"></div>
+      <div class="term-list" id="termList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ОБЩИЙ ЧАТ -->
+<div class="page" id="page-chat">
+  <div class="chat-page">
+    <div class="chat-box">
+      <div class="chat-header">
+        <div>
+          <h2>💬 Общий чат KRAKEN</h2>
+          <p>Настоящее общение через интернет — видят все зарегистрированные</p>
+        </div>
+      </div>
+
+      <div class="chat-locked" id="chatLocked">
+        <div class="icon">🔐</div>
+        <h3>Нужен вход в аккаунт</h3>
+        <p>Чтобы писать в чат, зарегистрируйся или войди под своим логином.</p>
+        <button class="btn" onclick="showPage('account')">Войти / Зарегистрироваться</button>
+      </div>
+
+      <div id="chatContent" style="display:none;">
+        <div class="chat-toolbar">
+          <span class="online-badge"><span class="online-dot"></span> <span id="myNameLabel"></span></span>
+          <button class="toolbar-btn" id="voiceToggleBtn" onclick="toggleVoiceOutput()">🔊 Озвучка: Выкл</button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+          <button class="mic-btn" id="micBtn" onclick="startVoiceInput()">🎤</button>
+          <textarea id="chatInput" rows="1" placeholder="Напиши сообщение..."></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ТЕМЫ -->
+<div class="page" id="page-topics">
+  <div class="topics-page">
+    <div class="topics-box" id="topicsGridView">
+      <h2>🗂 Темы обсуждений</h2>
+      <p>Выбери тему и заходи в отдельную комнату для общения</p>
+      <div class="topics-grid" id="topicsGrid"></div>
+    </div>
+
+    <div class="chat-box" id="topicChatView" style="display:none; max-width:900px;">
+      <div class="chat-header">
+        <button class="chat-back-btn" onclick="closeTopicChat()">← Назад к темам</button>
+        <div>
+          <h2 id="topicChatTitle">Тема</h2>
+          <p id="topicChatDesc"></p>
+        </div>
+      </div>
+
+      <div class="chat-locked" id="topicChatLocked">
+        <div class="icon">🔐</div>
+        <h3>Нужен вход в аккаунт</h3>
+        <p>Чтобы писать в этой теме, зарегистрируйся или войди под своим логином.</p>
+        <button class="btn" onclick="showPage('account')">Войти / Зарегистрироваться</button>
+      </div>
+
+      <div id="topicChatContent" style="display:none;">
+        <div class="chat-toolbar">
+          <span class="online-badge"><span class="online-dot"></span> <span id="topicMyNameLabel"></span></span>
+        </div>
+        <div class="chat-messages" id="topicChatMessages"></div>
+        <div class="chat-input-area">
+          <textarea id="topicChatInput" rows="1" placeholder="Напиши сообщение..."></textarea>
+          <button class="send-btn" id="topicSendBtn" onclick="sendTopicMessage()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ПРАВИЛА -->
+<div class="page" id="page-rules">
+  <div class="rules-page">
+    <div class="rules-box">
+      <h2>📜 Правила форума</h2>
+      <p class="rules-sub">Прочитай перед тем, как начать общение на KRAKEN</p>
+
+      <div class="rule-item">
+        <div class="rule-number">1</div>
+        <div class="rule-text">
+          <h3>🚫 Не быть представителем силовых структур</h3>
+          <p>Запрещено находиться на форуме сотрудникам ФБР, ФСБ, ОМОН, СОБР и другим представителям силовых/военных структур (включая СВО, ТЦК). Форум создан для энтузиастов и любителей кибербезопасности.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-number">2</div>
+        <div class="rule-text">
+          <h3>🤝 Уважение к участникам</h3>
+          <p>Не оскорблять членов форума. Общение должно быть уважительным, даже если ты не согласен с чьим-то мнением. Токсичность и хамство не приветствуются.</p>
+        </div>
+      </div>
+
+      <div class="rule-item">
+        <div class="rule-number">3</div>
+        <div class="rule-text">
+          <h3>🎩 Будь хакером-любителем</h3>
+          <p>Форум предназначен для энтузиастов, изучающих кибербезопасность в образовательных целях (White/Grey Hat подход). Никакой незаконной деятельности и вреда реальным людям/системам.</p>
+        </div>
+      </div>
+
+      <div class="rules-footer-note">
+        ⚠️ Нарушение правил может привести к блокировке аккаунта. Общайся с умом, хакер.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ОБОИ -->
+<div class="page" id="page-wallpaper">
+  <div class="wallpaper-wrapper">
+    <div class="wallpaper-box">
+      <h2>🖼 Выбери обои</h2>
+      <p>Настрой внешний вид сайта под себя</p>
+      <div class="wallpaper-section-title">Обычный</div>
+      <div class="wallpaper-grid">
+        <div class="wallpaper-item black-swatch selected" id="wp-default" onclick="setWallpaper('default', null)">
+          <div class="wallpaper-check">✓</div><div class="wallpaper-label">Чёрный</div>
+        </div>
+      </div>
+      <div class="wallpaper-section-title">Галерея</div>
+      <div class="wallpaper-grid">
+        <div class="wallpaper-item" id="wp-hacker1"
+             style="background-image:url('https://res.cloudinary.com/teepublic/image/private/s--TIP1tLoF--/t_Preview/b_rgb:000000,c_lpad,f_jpg,h_630,q_90,w_1200/v1478913310/production/designs/811060_1.jpg')"
+             onclick="setWallpaper('hacker1', 'https://res.cloudinary.com/teepublic/image/private/s--TIP1tLoF--/t_Preview/b_rgb:000000,c_lpad,f_jpg,h_630,q_90,w_1200/v1478913310/production/designs/811060_1.jpg')">
+          <div class="wallpaper-check">✓</div><div class="wallpaper-label">Хакерский 1</div>
+        </div>
+        <div class="wallpaper-item" id="wp-hacker2"
+             style="background-image:url('https://zinvapel.github.io/assets/it/tools/2018-linux-users.png')"
+             onclick="setWallpaper('hacker2', 'https://zinvapel.github.io/assets/it/tools/2018-linux-users.png')">
+          <div class="wallpaper-check">✓</div><div class="wallpaper-label">Хакерский 2</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- АККАУНТ -->
+<div class="page" id="page-account">
+  <div class="account-wrapper">
+    <div class="auth-box" id="authBox">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">Вход</button>
+        <button class="auth-tab" id="tabRegisterBtn" onclick="switchAuthTab('register')">Регистрация</button>
+      </div>
+      <div class="auth-form active" id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Твой логин" onkeydown="if(event.key==='Enter') handleLogin()">
+        <input type="password" id="loginPassword" placeholder="Пароль" onkeydown="if(event.key==='Enter') handleLogin()">
+        <button class="btn" id="loginBtn" onclick="handleLogin()">Войти</button>
+        <p class="auth-error" id="loginError"></p>
+      </div>
+      <div class="auth-form" id="registerForm">
+        <input type="text" id="regUsername" placeholder="Придумай логин (англ. буквы/цифры)" onkeydown="if(event.key==='Enter') handleRegister()">
+        <input type="password" id="regPassword" placeholder="Придумай пароль (мин. 6 символов)" onkeydown="if(event.key==='Enter') handleRegister()">
+        <button class="btn" id="registerBtn" onclick="handleRegister()">Зарегистрироваться</button>
+        <p class="auth-hint">📜 Регистрируясь, ты соглашаешься с правилами форума</p>
+        <p class="auth-error" id="registerError"></p>
+      </div>
+    </div>
+    <div class="profile-box" id="profileBox" style="display:none;">
+      <div class="avatar" id="avatarCircle">Ж</div>
+      <h2 id="profileName">Жаба</h2>
+      <p class="profile-sub">Ты в системе EBOS ALWAYS WIN X KRAKEN ✅</p>
+      <div class="profile-stats">
+        <div class="stat"><span id="statTermsViewed">0</span><small>терминов изучено</small></div>
+        <div class="stat"><span id="statChatMessages">0</span><small>сообщений в чате</small></div>
+      </div>
+      <div class="badges" id="badgesWrap"></div>
+      <button class="btn logout-btn" onclick="handleLogout()">Выйти</button>
+    </div>
+  </div>
+</div>
+
+<footer>💀 EBOS ALWAYS WIN X KRAKEN 🐙 root@kraken:~# _</footer>
+
+<script>
+  /* ================= FIREBASE ИНИЦИАЛИЗАЦИЯ ================= */
+  const firebaseConfig = {
+    apiKey: "AIzaSyAK0cBxu0c4qpde2QoLG0TqKonByJwafHk",
+    authDomain: "ebos-always-win-x-kraken.firebaseapp.com",
+    projectId: "ebos-always-win-x-kraken",
+    storageBucket: "ebos-always-win-x-kraken.firebasestorage.app",
+    messagingSenderId: "789049754365",
+    appId: "1:789049754365:web:ac82fbac30544c7e93f494"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const FAKE_EMAIL_DOMAIN = '@kraken.fake';
+  function usernameToEmail(username) { return username.toLowerCase().trim() + FAKE_EMAIL_DOMAIN; }
+
+  /* ================= ДАННЫЕ СЛОВАРЯ ================= */
+  const TERMS = [
+    { icon: '💥', name: 'DoS', tag: 'Атаки', what: 'Атака, при которой злоумышленник заваливает сервер огромным количеством запросов с ОДНОГО устройства, из-за чего сервер перестаёт справляться и падает или зависает для обычных пользователей.', why: 'Используется, чтобы вывести сайт или сервис из строя — например, чтобы конкуренты не могли им пользоваться, или в качестве протеста/шантажа.' },
+    { icon: '🌐', name: 'DDoS', tag: 'Атаки', what: 'То же самое, что DoS, но запросы идут не с одного устройства, а сразу с тысяч заражённых компьютеров/устройств (ботнета) по всему миру одновременно.', why: 'Массовое отключение крупных сервисов, вымогательство, политические/хактивистские акции.' },
+    { icon: '🎣', name: 'Фишинг', tag: 'Атаки', what: 'Злоумышленник создаёт поддельный сайт, письмо или сообщение, похожее на настоящее, и вынуждает жертву ввести логин, пароль или данные карты.', why: 'Кража паролей, денег с карт, доступа к аккаунтам.' },
+    { icon: '🦠', name: 'Malware', tag: 'Вредоносное ПО', what: 'Собирательный термин для любого вредоносного софта: вирусов, троянов, червей, шпионского ПО.', why: 'Кража данных, слежка, вымогательство, превращение компьютера в часть ботнета.' },
+    { icon: '🐴', name: 'Троян', tag: 'Вредоносное ПО', what: 'Программа, которая выглядит как что-то полезное, но внутри содержит вредоносный код, активирующийся после запуска.', why: 'Получение удалённого доступа, кража паролей, установка другого вредоносного ПО.' },
+    { icon: '🪱', name: 'Червь', tag: 'Вредоносное ПО', what: 'Самокопирующийся вредонос, заражающий другие компьютеры через сеть без участия пользователя.', why: 'Массовое заражение сетей, создание ботнетов.' },
+    { icon: '🔒', name: 'Ransomware', tag: 'Вредоносное ПО', what: 'Шифрует файлы на компьютере и требует выкуп за расшифровку.', why: 'Прямой заработок для злоумышленников.' },
+    { icon: '🕵️', name: 'Spyware', tag: 'Вредоносное ПО', what: 'Скрытно собирает информацию о действиях пользователя и отправляет её злоумышленнику.', why: 'Слежка, сбор данных для продажи или шантажа.' },
+    { icon: '⌨️', name: 'Кейлоггер', tag: 'Вредоносное ПО', what: 'Фиксирует каждое нажатие клавиш и передаёт информацию злоумышленнику.', why: 'Кража паролей, номеров карт, переписки.' },
+    { icon: '🤖', name: 'Ботнет', tag: 'Атаки', what: 'Сеть заражённых устройств, управляемых удалённо без ведома владельцев.', why: 'DDoS-атаки, рассылка спама, майнинг.' },
+    { icon: '🔑', name: 'Брутфорс', tag: 'Атаки', what: 'Автоматический перебор комбинаций паролей до нахождения правильной.', why: 'Взлом аккаунтов со слабыми паролями.' },
+    { icon: '💉', name: 'SQL-инъекция', tag: 'Атаки', what: 'Внедрение кода в поля ввода сайта, заставляющее базу данных выдать секретную информацию.', why: 'Кража баз данных, обход авторизации.' },
+    { icon: '📜', name: 'XSS', tag: 'Атаки', what: 'Внедрение JavaScript-кода на страницу сайта, выполняющегося в браузере других пользователей.', why: 'Кража сессий и куки пользователей.' },
+    { icon: '👤', name: 'MITM', tag: 'Атаки', what: 'Атака "человек посередине" — перехват данных между двумя сторонами общения.', why: 'Перехват паролей, банковских данных.' },
+    { icon: '🎭', name: 'Спуфинг', tag: 'Атаки', what: 'Подделка данных, чтобы выдать себя за кого-то другого.', why: 'Обман систем защиты, фишинг.' },
+    { icon: '🐍', name: 'Zero-Day', tag: 'Термины', what: 'Уязвимость, о которой ещё не знают разработчики — патча не существует.', why: 'Самые опасные эксплойты на чёрном рынке.' },
+    { icon: '🚪', name: 'Backdoor', tag: 'Термины', what: 'Скрытый способ получить доступ в обход обычной авторизации.', why: 'Заход в систему незаметно даже после смены паролей.' },
+    { icon: '👻', name: 'Rootkit', tag: 'Вредоносное ПО', what: 'Маскирует своё присутствие и присутствие другого вредоносного ПО от антивирусов.', why: 'Долговременный скрытый контроль над системой.' },
+    { icon: '🎯', name: 'Эксплойт', tag: 'Термины', what: 'Код, использующий конкретную уязвимость для получения доступа.', why: 'Инструмент практического взлома.' },
+    { icon: '📦', name: 'Payload', tag: 'Термины', what: 'Основная "боевая" часть вредоноса — то, что он реально делает после заражения.', why: 'Отделяет доставку от действия вредоноса.' },
+    { icon: '🐚', name: 'Reverse Shell', tag: 'Термины', what: 'Взломанный компьютер сам подключается обратно к злоумышленнику.', why: 'Полный удалённый контроль после взлома.' },
+    { icon: '🛡️', name: 'Firewall', tag: 'Защита', what: 'Фильтрует входящий и исходящий трафик по заданным правилам.', why: 'Базовая защита от несанкционированных подключений.' },
+    { icon: '🕶️', name: 'VPN', tag: 'Защита', what: 'Шифрует трафик и скрывает реальный IP-адрес.', why: 'Обход блокировок, анонимность в сети.' },
+    { icon: '🧅', name: 'Tor', tag: 'Защита', what: 'Пропускает трафик через несколько узлов, шифруя его на каждом этапе.', why: 'Максимальная анонимность, доступ к .onion сайтам.' },
+    { icon: '🕳️', name: 'Даркнет', tag: 'Термины', what: 'Зона интернета, доступная только через Tor или похожие сети.', why: 'Нелегальные площадки и легальное анонимное общение.' },
+    { icon: '#️⃣', name: 'Хэш', tag: 'Термины', what: 'Уникальный "отпечаток" данных фиксированной длины.', why: 'Хранение паролей без открытого текста.' },
+    { icon: '🔐', name: 'Шифрование', tag: 'Защита', what: 'Преобразование информации в нечитаемый вид с помощью ключа.', why: 'Защита переписки, файлов, паролей.' },
+    { icon: '🎩', name: 'White Hat', tag: 'Хакеры', what: 'Этичный хакер, взламывающий системы легально с разрешения владельца.', why: 'Находит и помогает исправлять уязвимости.' },
+    { icon: '🎩', name: 'Black Hat', tag: 'Хакеры', what: 'Хакер, взламывающий системы незаконно ради выгоды или вреда.', why: 'Кража данных, вымогательство.' },
+    { icon: '🎩', name: 'Grey Hat', tag: 'Хакеры', what: 'Взламывает без разрешения, но без злого умысла.', why: 'Промежуточное положение — всё равно юридически рискует.' },
+    { icon: '🏆', name: 'CTF', tag: 'Термины', what: 'Соревнования по кибербезопасности с поиском скрытых "флагов".', why: 'Легальная тренировка навыков.' },
+    { icon: '🧪', name: 'Пентест', tag: 'Термины', what: 'Санкционированная имитация хакерской атаки на систему компании.', why: 'Проверка защищённости — законная профессия.' },
+    { icon: '🍯', name: 'Honeypot', tag: 'Защита', what: 'Приманка для отслеживания действий злоумышленников.', why: 'Изучение методов атак.' },
+    { icon: '🎭', name: 'Социальная инженерия', tag: 'Атаки', what: 'Получение данных через манипуляцию людьми, а не технологии.', why: 'Обходит любую техническую защиту.' },
+    { icon: '📡', name: 'Сниффинг', tag: 'Атаки', what: 'Перехват и анализ трафика в сети.', why: 'Кража данных в незащищённых Wi-Fi.' },
+    { icon: '🔓', name: '2FA', tag: 'Защита', what: 'Требует не только пароль, но и второй фактор подтверждения.', why: 'Защита даже при краже пароля.' },
+    { icon: '🌍', name: 'IP-адрес', tag: 'Термины', what: 'Числовой идентификатор устройства в интернете.', why: 'Определение местоположения, отслеживание.' },
+    { icon: '🚧', name: 'Сканирование портов', tag: 'Термины', what: 'Проверка открытых сетевых портов на устройстве.', why: 'Разведка перед атакой.' },
+  ];
+
+  const CATEGORIES = ['Все', 'Атаки', 'Вредоносное ПО', 'Защита', 'Хакеры', 'Термины'];
+  let activeCategory = 'Все';
+  let searchQuery = '';
+  let viewedTerms = new Set(JSON.parse(localStorage.getItem('kraken_viewed_terms') || '[]'));
+
+  function renderFilterTabs() {
+    const wrap = document.getElementById('filterTabs');
+    wrap.innerHTML = '';
+    CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-tab' + (cat === activeCategory ? ' active' : '');
+      btn.textContent = cat;
+      btn.onclick = () => { activeCategory = cat; renderFilterTabs(); renderTerms(); };
+      wrap.appendChild(btn);
+    });
+    window.rebindCursor && window.rebindCursor();
+  }
+
+  function renderTerms() {
+    const list = document.getElementById('termList');
+    const countEl = document.getElementById('termCount');
+    list.innerHTML = '';
+    const q = searchQuery.toLowerCase();
+    const filtered = TERMS.filter(t => {
+      const matchesCat = activeCategory === 'Все' || t.tag === activeCategory;
+      const matchesSearch = t.name.toLowerCase().includes(q) || t.what.toLowerCase().includes(q);
+      return matchesCat && matchesSearch;
+    });
+    countEl.textContent = 'Найдено: ' + filtered.length + ' из ' + TERMS.length;
+
+    if (filtered.length === 0) {
+      const div = document.createElement('div');
+      div.className = 'no-results';
+      div.textContent = '🔍 Ничего не найдено.';
+      list.appendChild(div);
+      return;
+    }
+
+    filtered.forEach(t => {
+      const card = document.createElement('div');
+      card.className = 'term-card';
+      card.dataset.termName = t.name;
+
+      const header = document.createElement('div');
+      header.className = 'term-header';
+      const titleWrap = document.createElement('div');
+      titleWrap.className = 'term-title-wrap';
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'term-icon'; iconSpan.textContent = t.icon;
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'term-name'; nameDiv.textContent = t.name;
+      titleWrap.appendChild(iconSpan); titleWrap.appendChild(nameDiv);
+      const tagSpan = document.createElement('span');
+      tagSpan.className = 'term-tag'; tagSpan.textContent = t.tag;
+      const arrowSpan = document.createElement('span');
+      arrowSpan.className = 'term-arrow'; arrowSpan.textContent = '▼';
+      header.appendChild(titleWrap); header.appendChild(tagSpan); header.appendChild(arrowSpan);
+      header.onclick = () => toggleTerm(card);
+
+      const body = document.createElement('div');
+      body.className = 'term-body';
+      const bodyInner = document.createElement('div');
+      bodyInner.className = 'term-body-inner';
+      const label1 = document.createElement('div'); label1.className = 'term-label'; label1.textContent = 'Что это';
+      const text1 = document.createElement('div'); text1.className = 'term-text'; text1.textContent = t.what;
+      const label2 = document.createElement('div'); label2.className = 'term-label'; label2.textContent = 'Для чего используется';
+      const text2 = document.createElement('div'); text2.className = 'term-text'; text2.textContent = t.why;
+      bodyInner.appendChild(label1); bodyInner.appendChild(text1); bodyInner.appendChild(label2); bodyInner.appendChild(text2);
+      body.appendChild(bodyInner);
+
+      card.appendChild(header); card.appendChild(body);
+      list.appendChild(card);
+    });
+    window.rebindCursor && window.rebindCursor();
+  }
+
+  function toggleTerm(card) {
+    const wasOpen = card.classList.contains('open');
+    card.classList.toggle('open');
+    if (!wasOpen) {
+      viewedTerms.add(card.dataset.termName);
+      localStorage.setItem('kraken_viewed_terms', JSON.stringify([...viewedTerms]));
+      renderAccountPage();
+    }
+  }
+
+  document.getElementById('searchInput').addEventListener('input', e => { searchQuery = e.target.value; renderTerms(); });
+  renderFilterTabs(); renderTerms();
+  document.getElementById('termCountStat').textContent = TERMS.length;
+
+  /* ================= ТЕМЫ ================= */
+  const TOPICS = [
+    { id: 'obshenie', icon: '💬', name: 'Общение', desc: 'Свободное общение на любые темы' },
+    { id: 'vzlom', icon: '🔓', name: 'Взлом и пентест', desc: 'Обсуждение легального пентеста и CTF' },
+    { id: 'malware', icon: '🦠', name: 'Малварь и защита', desc: 'Вирусы, антивирусы, разбор угроз' },
+    { id: 'news', icon: '📰', name: 'Новости кибербеза', desc: 'Свежие новости из мира ИБ' },
+    { id: 'help', icon: '🆘', name: 'Помощь новичкам', desc: 'Задавай вопросы, если только начинаешь' },
+  ];
+
+  function renderTopicsGrid() {
+    const grid = document.getElementById('topicsGrid');
+    grid.innerHTML = '';
+    TOPICS.forEach(topic => {
+      const card = document.createElement('div');
+      card.className = 'topic-card';
+      card.innerHTML = '<div class="topic-icon">' + topic.icon + '</div><div class="topic-name">' + topic.name + '</div><div class="topic-desc">' + topic.desc + '</div>';
+      card.onclick = () => openTopicChat(topic);
+      grid.appendChild(card);
+    });
+    window.rebindCursor && window.rebindCursor();
+  }
+  renderTopicsGrid();
+
+  let currentTopicUnsub = null;
+  let currentTopicId = null;
+
+  function openTopicChat(topic) {
+    currentTopicId = topic.id;
+    document.getElementById('topicsGridView').style.display = 'none';
+    document.getElementById('topicChatView').style.display = 'flex';
+    document.getElementById('topicChatTitle').textContent = topic.icon + ' ' + topic.name;
+    document.getElementById('topicChatDesc').textContent = topic.desc;
+    checkTopicChatAccess();
+  }
+
+  function closeTopicChat() {
+    if (currentTopicUnsub) { currentTopicUnsub(); currentTopicUnsub = null; }
+    currentTopicId = null;
+    document.getElementById('topicsGridView').style.display = 'block';
+    document.getElementById('topicChatView').style.display = 'none';
+  }
+
+  function checkTopicChatAccess() {
+    const user = auth.currentUser;
+    const locked = document.getElementById('topicChatLocked');
+    const content = document.getElementById('topicChatContent');
+    if (user) {
+      locked.style.display = 'none';
+      content.style.display = 'block';
+      document.getElementById('topicMyNameLabel').textContent = currentUsername || '...';
+      listenTopicMessages(currentTopicId);
+    } else {
+      locked.style.display = 'block';
+      content.style.display = 'none';
+    }
+  }
+
+  function listenTopicMessages(topicId) {
+    if (currentTopicUnsub) { currentTopicUnsub(); currentTopicUnsub = null; }
+    const container = document.getElementById('topicChatMessages');
+    container.innerHTML = '<div class="message system">Загрузка сообщений...</div>';
+
+    currentTopicUnsub = db.collection('chat_topic_' + topicId)
+      .orderBy('timestamp', 'asc')
+      .limitToLast(150)
+      .onSnapshot(snapshot => {
+        container.innerHTML = '';
+        if (snapshot.empty) {
+          container.innerHTML = '<div class="message system">Здесь пока пусто. Начни обсуждение первым! 🐙</div>';
+          return;
+        }
+        snapshot.forEach(doc => {
+          const m = doc.data();
+          renderChatMessage(container, m);
+        });
+        container.scrollTop = container.scrollHeight;
+      }, err => {
+        console.error(err);
+        container.innerHTML = '<div class="message system">⚠️ Ошибка загрузки. Проверь настройки Firestore Rules.</div>';
+      });
+  }
+
+  document.getElementById('topicChatInput').addEventListener('input', function() {
+    this.style.height = 'auto'; this.style.height = Math.min(this.scrollHeight, 90) + 'px';
+  });
+  document.getElementById('topicChatInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTopicMessage(); }
+  });
+
+  function sendTopicMessage() {
+    const input = document.getElementById('topicChatInput');
+    const text = input.value.trim();
+    if (!text || !auth.currentUser || !currentTopicId) return;
+    input.value = ''; input.style.height = 'auto';
+
+    db.collection('chat_topic_' + currentTopicId).add({
+      author: currentUsername,
+      uid: auth.currentUser.uid,
+      text: text,
+      timestamp: Date.now()
+    }).then(() => {
+      incrementMyMessageCount();
+    }).catch(err => {
+      showToast('Ошибка отправки: ' + err.message, 'error');
+    });
+  }
+
+  /* ================= НАВИГАЦИЯ ================= */
+  function showPage(page, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    const targetBtn = btn || document.querySelector('.nav-btn[data-page="' + page + '"]');
+    if (targetBtn) targetBtn.classList.add('active');
+    if (page === 'account') renderAccountPage();
+    if (page === 'chat') checkGeneralChatAccess();
+    window.rebindCursor && window.rebindCursor();
+  }
+
+  /* ================= ТОСТЫ ================= */
+  function showToast(text, type = 'ok') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (type === 'error' ? ' error' : '');
+    toast.textContent = text;
+    container.appendChild(toast);
+    setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 300); }, 3500);
+  }
+
+  /* ================= СПЛЭШ ================= */
+  const splashLines = [
+    'root@kraken:~$ initializing system...',
+    'root@kraken:~$ connecting to firebase...',
+    'root@kraken:~$ authentication module loaded [OK]',
+    'root@kraken:~$ access granted.',
+    'root@kraken:~$ welcome, hacker.'
+  ];
+  const splashTextEl = document.getElementById('splashText');
+  let lineIdx = 0, charIdx = 0, fullSplashText = '';
+  function typeSplash() {
+    if (lineIdx >= splashLines.length) { setTimeout(() => document.getElementById('splash').classList.add('hidden'), 500); return; }
+    const currentLine = splashLines[lineIdx];
+    if (charIdx <= currentLine.length) {
+      splashTextEl.textContent = fullSplashText + currentLine.slice(0, charIdx);
+      charIdx++; setTimeout(typeSplash, 22);
+    } else { fullSplashText += currentLine + '\n'; lineIdx++; charIdx = 0; setTimeout(typeSplash, 180); }
+  }
+  typeSplash();
+
+  const subtitlePhrases = ['Общайся в реальном времени...', 'Изучай кибербезопасность...', 'Погрузись в мир хакеров...', 'Знание — сила...'];
+  let phraseIdx = 0, subCharIdx = 0, deleting = false;
+  const typedEl = document.getElementById('typedSubtitle');
+  function typeLoop() {
+    const phrase = subtitlePhrases[phraseIdx];
+    if (!deleting) {
+      typedEl.textContent = phrase.slice(0, subCharIdx + 1); subCharIdx++;
+      if (subCharIdx === phrase.length) { deleting = true; setTimeout(typeLoop, 1800); return; }
+    } else {
+      typedEl.textContent = phrase.slice(0, subCharIdx - 1); subCharIdx--;
+      if (subCharIdx === 0) { deleting = false; phraseIdx = (phraseIdx + 1) % subtitlePhrases.length; }
+    }
+    setTimeout(typeLoop, deleting ? 30 : 60);
+  }
+  typeLoop();
+
+  /* ================= MATRIX BACKGROUND ================= */
+  const matrixCanvas = document.getElementById('matrixCanvas');
+  const mctx = matrixCanvas.getContext('2d');
+  matrixCanvas.width = window.innerWidth; matrixCanvas.height = window.innerHeight;
+  window.addEventListener('resize', () => { matrixCanvas.width = window.innerWidth; matrixCanvas.height = window.innerHeight; });
+  const matrixChars = '01アイウエオカキクケコサシスセソ'.split('');
+  const fontSize = 16;
+  let drops = new Array(Math.floor(matrixCanvas.width / fontSize)).fill(1);
+  function drawMatrix() {
+    mctx.fillStyle = 'rgba(0,0,0,0.05)'; mctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+    mctx.fillStyle = '#00ff87'; mctx.font = fontSize + 'px monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const text = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+      mctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 50);
+
+  /* ================= ОБОИ ================= */
+  function applyWallpaper(type, url) {
+    const layer = document.getElementById('wallpaperLayer');
+    if (type === 'default' || !url) { layer.classList.remove('active'); layer.style.backgroundImage = ''; }
+    else { layer.style.backgroundImage = "url('" + url + "')"; layer.classList.add('active'); }
+    document.querySelectorAll('.wallpaper-item').forEach(el => el.classList.remove('selected'));
+    const activeEl = document.getElementById('wp-' + type);
+    if (activeEl) activeEl.classList.add('selected');
+  }
+  function setWallpaper(type, url) {
+    localStorage.setItem('kraken_wallpaper', JSON.stringify({ type, url }));
+    applyWallpaper(type, url);
+    showToast('Обои изменены 🖼');
+  }
+  (function initWallpaper() {
+    const saved = localStorage.getItem('kraken_wallpaper');
+    if (saved) { const { type, url } = JSON.parse(saved); applyWallpaper(type, url); }
+  })();
+
+  /* ================= КУРСОР + ДЫМ ================= */
+  const isTouch = matchMedia('(pointer: coarse)').matches;
+  if (!isTouch) {
+    document.body.classList.add('no-touch');
+    const dot = document.getElementById('cursorDot');
+    window.addEventListener('mousemove', e => { dot.style.left = e.clientX + 'px'; dot.style.top = e.clientY + 'px'; });
+    function bindCursorHover() {
+      document.querySelectorAll('.btn, .card, .nav-btn, .auth-tab, .wallpaper-item, .filter-tab, .term-header, input, textarea, .toolbar-btn, .send-btn, .mic-btn, .topic-card, .chat-back-btn').forEach(el => {
+        el.addEventListener('mouseenter', () => { dot.style.width = '25px'; dot.style.height = '25px'; });
+        el.addEventListener('mouseleave', () => { dot.style.width = '10px'; dot.style.height = '10px'; });
+      });
+    }
+    bindCursorHover();
+    window.rebindCursor = bindCursorHover;
+  } else { window.rebindCursor = () => {}; }
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.btn');
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.left = (e.clientX - rect.left) + 'px'; ripple.style.top = (e.clientY - rect.top) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+
+  const canvas = document.getElementById('smoke');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+  let particles = [];
+  function spawnAt(x, y) {
+    for (let i = 0; i < 3; i++) particles.push(new Particle(x, y));
+    if (Math.random() < 0.08) particles.push(new Particle(x, y, true));
+  }
+  window.addEventListener('mousemove', e => spawnAt(e.clientX, e.clientY));
+  window.addEventListener('touchmove', e => { if (e.touches[0]) spawnAt(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+  class Particle {
+    constructor(x, y, sparkle = false) {
+      this.x = x + rand(-5, 5); this.y = y + rand(-5, 5);
+      this.sparkle = sparkle;
+      this.size = sparkle ? rand(2, 4) : rand(8, 22);
+      this.speedX = rand(-1, 1);
+      this.speedY = sparkle ? rand(-1.5, -3) : rand(-2, -0.5);
+      this.life = 1;
+      this.decay = sparkle ? rand(0.015, 0.03) : rand(0.01, 0.025);
+      const hue = rand(100, 150);
+      this.color = sparkle ? 'hsla(' + hue + ', 100%, 80%,' : 'hsla(' + hue + ', 100%, 55%,';
+    }
+    update() { this.x += this.speedX; this.y += this.speedY; this.size *= 0.97; this.life -= this.decay; }
+    draw() {
+      ctx.beginPath();
+      if (this.sparkle) { ctx.fillStyle = this.color + this.life + ')'; ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+      else {
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+        gradient.addColorStop(0, this.color + this.life * 0.6 + ')');
+        gradient.addColorStop(1, this.color + '0)');
+        ctx.fillStyle = gradient; ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p, i) => { p.update(); p.draw(); if (p.life <= 0 || p.size <= 0.5) particles.splice(i, 1); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  /* ================= АУТЕНТИФИКАЦИЯ (Firebase Auth) ================= */
+  let currentUsername = null; // человекочитаемый логин
+
+  function switchAuthTab(tab) {
+    document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+    document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+    document.getElementById('tabLoginBtn').classList.toggle('active', tab === 'login');
+    document.getElementById('tabRegisterBtn').classList.toggle('active', tab === 'register');
+  }
+
+  function validUsername(u) { return /^[a-zA-Z0-9_]{3,20}$/.test(u); }
+
+  async function handleRegister() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const errorEl = document.getElementById('registerError');
+    const btn = document.getElementById('registerBtn');
+    errorEl.textContent = '';
+
+    if (!validUsername(username)) { errorEl.textContent = 'Логин: 3-20 символов, только латиница/цифры/подчёркивание'; return; }
+    if (password.length < 6) { errorEl.textContent = 'Пароль должен быть минимум 6 символов'; return; }
+
+    btn.disabled = true; btn.textContent = 'Проверка...';
+
+    try {
+      const usernameDoc = await db.collection('usernames').doc(username.toLowerCase()).get();
+      if (usernameDoc.exists) { errorEl.textContent = 'Этот логин уже занят 😕'; btn.disabled = false; btn.textContent = 'Зарегистрироваться'; return; }
+
+      btn.textContent = 'Создание аккаунта...';
+      const cred = await auth.createUserWithEmailAndPassword(usernameToEmail(username), password);
+
+      await db.collection('usernames').doc(username.toLowerCase()).set({ uid: cred.user.uid });
+      await db.collection('users').doc(cred.user.uid).set({
+        username: username,
+        createdAt: Date.now(),
+        messageCount: 0
+      });
+
+      showToast('Аккаунт создан! Добро пожаловать, ' + username + ' 🎉');
+    } catch (err) {
+      errorEl.textContent = firebaseErrorToText(err);
+    }
+    btn.disabled = false; btn.textContent = 'Зарегистрироваться';
+  }
+
+  async function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    errorEl.textContent = '';
+
+    if (!username || !password) { errorEl.textContent = 'Заполни оба поля'; return; }
+
+    btn.disabled = true; btn.textContent = 'Вход...';
+    try {
+      await auth.signInWithEmailAndPassword(usernameToEmail(username), password);
+      showToast('Добро пожаловать, ' + username + '! 👋');
+    } catch (err) {
+      errorEl.textContent = firebaseErrorToText(err);
+    }
+    btn.disabled = false; btn.textContent = 'Войти';
+  }
+
+  function firebaseErrorToText(err) {
+    const code = err.code || '';
+    if (code.includes('wrong-password') || code.includes('invalid-credential')) return 'Неверный логин или пароль ❌';
+    if (code.includes('user-not-found')) return 'Пользователь не найден ❌';
+    if (code.includes('email-already-in-use')) return 'Этот логин уже занят 😕';
+    if (code.includes('weak-password')) return 'Пароль слишком простой (минимум 6 символов)';
+    if (code.includes('network-request-failed')) return 'Ошибка сети. Проверь интернет 🌐';
+    return 'Ошибка: ' + err.message;
+  }
+
+  function handleLogout() {
+    auth.signOut();
+    showToast('Ты вышел из аккаунта 👋');
+  }
+
+  const ACHIEVEMENTS = [
+    { name: '🐣 Новичок', min: 1 },
+    { name: '📚 Ученик', min: 10 },
+    { name: '🧠 Знаток', min: 20 },
+    { name: '🏆 Мастер словаря', min: 35 },
+  ];
+
+  function renderAccountPage() {
+    const user = auth.currentUser;
+    const authBox = document.getElementById('authBox');
+    const profileBox = document.getElementById('profileBox');
+    if (user && currentUsername) {
+      authBox.style.display = 'none';
+      profileBox.style.display = 'block';
+      document.getElementById('avatarCircle').textContent = currentUsername.charAt(0).toUpperCase();
+      document.getElementById('profileName').textContent = currentUsername;
+      document.getElementById('statTermsViewed').textContent = viewedTerms.size;
+
+      db.collection('users').doc(user.uid).get().then(doc => {
+        if (doc.exists) document.getElementById('statChatMessages').textContent = doc.data().messageCount || 0;
+      });
+
+      const badgesWrap = document.getElementById('badgesWrap');
+      badgesWrap.innerHTML = '';
+      ACHIEVEMENTS.forEach(a => {
+        const unlocked = viewedTerms.size >= a.min;
+        const el = document.createElement('div');
+        el.className = 'badge' + (unlocked ? '' : ' locked');
+        el.textContent = a.name;
+        badgesWrap.appendChild(el);
+      });
+      window.rebindCursor && window.rebindCursor();
+    } else {
+      authBox.style.display = 'block';
+      profileBox.style.display = 'none';
+    }
+  }
+
+  function updateNavAccountLabel() {
+    const btn = document.getElementById('navAccountBtn');
+    btn.textContent = currentUsername ? '👤 ' + currentUsername : '🔐 Аккаунт';
+  }
+
+  function incrementMyMessageCount() {
+    const user = auth.currentUser;
+    if (!user) return;
+    db.collection('users').doc(user.uid).update({
+      messageCount: firebase.firestore.FieldValue.increment(1)
+    }).catch(() => {});
+  }
+
+  /* ================= ОБЩИЙ ЧАТ ================= */
+  const chatMessages = document.getElementById('chatMessages');
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const micBtn = document.getElementById('micBtn');
+  let generalChatUnsub = null;
+
+  chatInput.addEventListener('input', () => { chatInput.style.height = 'auto'; chatInput.style.height = Math.min(chatInput.scrollHeight, 90) + 'px'; });
+  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+  function checkGeneralChatAccess() {
+    const user = auth.currentUser;
+    const locked = document.getElementById('chatLocked');
+    const content = document.getElementById('chatContent');
+    if (user && currentUsername) {
+      locked.style.display = 'none';
+      content.style.display = 'block';
+      document.getElementById('myNameLabel').textContent = currentUsername;
+      listenGeneralMessages();
+      setTimeout(() => chatInput.focus(), 200);
+    } else {
+      locked.style.display = 'block';
+      content.style.display = 'none';
+    }
+  }
+
+  function renderChatMessage(container, m) {
+    const isMine = m.uid === (auth.currentUser && auth.currentUser.uid);
+    const div = document.createElement('div');
+    div.className = 'message ' + (isMine ? 'mine' : 'other');
+
+    const authorEl = document.createElement('span');
+    authorEl.className = 'msg-author';
+    authorEl.textContent = isMine ? 'Вы' : (m.author || 'Аноним');
+    div.appendChild(authorEl);
+
+    const textEl = document.createElement('div');
+    textEl.style.whiteSpace = 'pre-wrap';
+    textEl.textContent = m.text;
+    div.appendChild(textEl);
+
+    const timeEl = document.createElement('div');
+    timeEl.className = 'msg-time';
+    const d = new Date(m.timestamp);
+    timeEl.textContent = isNaN(d) ? '' : d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    div.appendChild(timeEl);
+
+    container.appendChild(div);
+  }
+
+  function listenGeneralMessages() {
+    if (generalChatUnsub) { generalChatUnsub(); generalChatUnsub = null; }
+    chatMessages.innerHTML = '<div class="message system">Загрузка сообщений...</div>';
+
+    generalChatUnsub = db.collection('chat_general')
+      .orderBy('timestamp', 'asc')
+      .limitToLast(150)
+      .onSnapshot(snapshot => {
+        chatMessages.innerHTML = '';
+        if (snapshot.empty) {
+          chatMessages.innerHTML = '<div class="message system">Чат пуст. Напиши первым! 🐙</div>';
+          return;
+        }
+        snapshot.forEach(doc => renderChatMessage(chatMessages, doc.data()));
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, err => {
+        console.error(err);
+        chatMessages.innerHTML = '<div class="message system">⚠️ Ошибка загрузки. Проверь, что Firestore Rules настроены (см. инструкцию).</div>';
+      });
+  }
+
+  function sendMessage() {
+    const user = auth.currentUser;
+    if (!user) { showToast('Сначала войди в аккаунт', 'error'); return; }
+    const text = chatInput.value.trim();
+    if (!text) return;
+    chatInput.value = ''; chatInput.style.height = 'auto';
+
+    db.collection('chat_general').add({
+      author: currentUsername,
+      uid: user.uid,
+      text: text,
+      timestamp: Date.now()
+    }).then(() => {
+      incrementMyMessageCount();
+      if (voiceOutputEnabled) speak(text);
+    }).catch(err => {
+      showToast('Ошибка отправки: ' + err.message, 'error');
+    });
+  }
+
+  function startVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) { showToast('Голосовой ввод не поддерживается в этом браузере', 'error'); return; }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ru-RU'; recognition.interimResults = false;
+    recognition.onstart = () => micBtn.classList.add('recording');
+    recognition.onend = () => micBtn.classList.remove('recording');
+    recognition.onerror = () => { micBtn.classList.remove('recording'); showToast('Не удалось распознать речь', 'error'); };
+    recognition.onresult = (e) => { chatInput.value = e.results[0][0].transcript; chatInput.dispatchEvent(new Event('input')); };
+    recognition.start();
+  }
+
+  let voiceOutputEnabled = localStorage.getItem('kraken_voice_output') === 'on';
+  function toggleVoiceOutput() {
+    voiceOutputEnabled = !voiceOutputEnabled;
+    localStorage.setItem('kraken_voice_output', voiceOutputEnabled ? 'on' : 'off');
+    document.getElementById('voiceToggleBtn').textContent = '🔊 Озвучка: ' + (voiceOutputEnabled ? 'Вкл' : 'Выкл');
+  }
+  document.getElementById('voiceToggleBtn').textContent = '🔊 Озвучка: ' + (voiceOutputEnabled ? 'Вкл' : 'Выкл');
+  function speak(text) {
+    if (!('speechSynthesis' in window)) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'ru-RU';
+    window.speechSynthesis.speak(utter);
+  }
+
+  /* ================= СЛЕЖЕНИЕ ЗА СОСТОЯНИЕМ АВТОРИЗАЦИИ ================= */
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const doc = await db.collection('users').doc(user.uid).get();
+      currentUsername = doc.exists ? doc.data().username : user.email.split('@')[0];
+    } else {
+      currentUsername = null;
+    }
+    updateNavAccountLabel();
+    renderAccountPage();
+
+    // обновляем видимость чатов, если открыты соответствующие вкладки
+    if (document.getElementById('page-chat').classList.contains('active')) checkGeneralChatAccess();
+    if (document.getElementById('page-topics').classList.contains('active') && currentTopicId) checkTopicChatAccess();
+  });
+</script>
+
+</body>
+</html>
